@@ -1,0 +1,27 @@
+# Build artifacts
+/target/
+/**/target/
+# Rust build outputs
+**/Cargo.lock
+# Dependencies
+/vendor/
+**/vendor/
+# Large submodules
+/orion/
+/orion-automation/
+/tools/
+/results/
+/docs/
+/tests/
+# IDE and editor files
+.vscode/
+.idea/
+# OS files
+.DS_Store
+Thumbs.db
+# Misc
+*.pyc
+__pycache__
+*.log
+# Worktrees (already)
+.worktrees/

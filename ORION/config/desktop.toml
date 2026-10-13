@@ -1,0 +1,53 @@
+# Hermes Profile: ORION Desktop
+# Active modules: voice, control, memory, planning, automation, security
+
+profile = "orion-desktop"
+description = "Full ORION on local Linux desktop"
+extends = "default"
+
+[modules.voice]
+enabled = true
+wake_word = "orion"
+stt_model = "whisper-large-v3"
+tts_model = "piper-en-us"
+
+[modules.control]
+enabled = true
+backend = "auto"
+screenshot_interval_ms = 1000
+
+[modules.memory]
+enabled = true
+watch_paths = ["~/Downloads", "~/Documents", "~/Orion", "~/Projects"]
+
+[modules.planning]
+enabled = true
+llm_model = "nvidia/nemotron-3-ultra"
+max_context_tokens = 32768
+
+[modules.automation]
+enabled = true
+max_concurrent = 10
+
+[modules.security]
+enabled = true
+profile = "desktop"
+
+skills = [
+  "orion-voice",
+  "orion-control", 
+  "orion-memory",
+  "orion-planning",
+  "orion-automation",
+  "orion-security",
+  "hermes-agent",
+  "computer-use",
+  "codex",
+  "claude-code"
+]
+
+[environment]
+ORION_PROFILE = "desktop"
+ORION_CONFIG_DIR = "~/.config/orion"
+ORION_MODELS_DIR = "~/.orion/models"
+CUDA_VISIBLE_DEVICES = "0"

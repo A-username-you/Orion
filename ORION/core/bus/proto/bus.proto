@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package orion.bus;
+
+service Bus {
+  rpc Publish(PublishRequest) returns (PublishResponse);
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
+}
+
+message PublishRequest {
+  string subject = 1;
+  bytes payload = 2;
+}
+
+message PublishResponse {
+  bool success = 1;
+}
+
+message SubscribeRequest {
+  string subject = 1;
+}
+
+message SubscribeResponse {
+  bytes payload = 1;
+}

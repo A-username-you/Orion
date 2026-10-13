@@ -1,0 +1,89 @@
+[package]
+name = "orion-core"
+version = "0.1.0"
+edition = "2021"
+description = "ORION core daemon: voice, control, memory, planning, message bus"
+
+[features]
+default = ["voice", "control", "memory", "planning", "bus"]
+voice = ["orion-voice"]
+control = ["orion-control"]
+memory = ["orion-memory"]
+planning = ["orion-planning"]
+bus = ["orion-bus"]
+
+[lib]
+name = "orion_core"
+path = "src/lib.rs"
+
+[workspace]
+members = [
+    "types",
+    "voice",
+    "control",
+    "memory",
+    "planning",
+    "bus",
+]
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[workspace.dependencies]
+prost = "0.13"
+prost-types = "0.13"
+tonic = { version = "0.13", features = ["tls-native-roots", "transport"] }
+tonic-build = "0.13"
+
+[dependencies]
+# Workspace member dependencies (re-exported)
+orion-types = { path = "types" }
+orion-voice = { path = "voice", optional = true }
+orion-control = { path = "control", optional = true }
+orion-memory = { path = "memory", optional = true }
+orion-planning = { path = "planning", optional = true }
+orion-bus = { path = "bus", optional = true }
+
+# Async runtime
+tokio = { version = "1.40", features = ["full", "tracing"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Message bus
+async-nats = "0.33"
+tonic = { workspace = true }
+prost = { workspace = true }
+
+# Config
+config = { version = "0.14", features = ["toml"] }
+dirs = "5.0"
+
+# GPU/ML
+candle-core = { version = "0.8", features = [], optional = true }
+candle-nn = { version = "0.8", optional = true }
+candle-transformers = { version = "0.8", optional = true }
+tokenizers = "0.20"
+
+# Audio
+cpal = "0.15"
+hound = "3.5"
+rubato = "0.15"
+
+# Computer control
+ash = "0.38"  # Vulkan for screenshot/overlay
+wayland-client = "0.31"
+wayland-protocols = "0.31"
+
+# Embeddings/Vector
+# sqlite = { version = "0.36", features = ["bundled", "extension"] }  # Used by memory module
+# libsqlite3-sys = { version = "0.30", features = ["bundled", "loadable_extension"] }  # Used by memory module
+# sqlite-vec = "0.1"  # Not on crates.io yet
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "gzip"] }

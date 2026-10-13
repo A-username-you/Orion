@@ -1,0 +1,21 @@
+[package]
+name = "orion-automation"
+version = "0.1.0"
+edition = "2024"
+description = "ORION automation engine: cron, triggers, and DAG workflows"
+repository = "https://github.com/unk-/Orion"
+
+[dependencies]
+orion-types = { path = "../core/types" }
+orion-bus = { path = "../core/bus" }
+anyhow = "1.0"
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+async-trait = "0.1"
+uuid = { version = "1.0", features = ["v4"] }
+futures-util = "0.3"
+
+[build-dependencies]

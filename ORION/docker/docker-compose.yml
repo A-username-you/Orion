@@ -1,0 +1,169 @@
+version: '3.8'
+
+services:
+  # NATS message bus
+  nats:
+    image: nats:2.10-alpine
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"   # Client connections
+      - "8222:8222"   # HTTP monitoring
+    volumes:
+      - nats_data:/data
+      - ./config/nats.conf:/etc/nats/nats.conf:ro
+    healthcheck:
+      test: ["CMD", "nats", "server", "check", "jetstream"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 0
+              capabilities: [gpu]
+
+  # ORION Core Daemon
+  orion-core:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.core
+    environment:
+      - ORION_PROFILE=server
+      - ORION_CONFIG_DIR=/etc/orion
+      - ORION_MODELS_DIR=/models
+      - CUDA_VISIBLE_DEVICES=0
+      - NATS_URL=nats://nats:4222
+      - RUST_LOG=info
+    volumes:
+      - ../config/server.toml:/etc/orion/config.toml:ro
+      - ~/.orion/models:/models:ro
+      - orion_data:/var/lib/orion
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro  # For display access if needed
+    depends_on:
+      nats:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, compute, utility]
+    restart: unless-stopped
+
+  # ORION API Server (FastAPI)
+  orion-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    environment:
+      - ORION_PROFILE=server
+      - ORION_CONFIG_DIR=/etc/orion
+      - NATS_URL=nats://nats:4222
+      - GRPC_ADDR=orion-core:50051
+      - RUST_LOG=info
+    ports:
+      - "8080:8080"   # REST API
+      - "50051:50051" # gRPC
+    volumes:
+      - ../config/server.toml:/etc/orion/config.toml:ro
+      - orion_data:/var/lib/orion
+    depends_on:
+      - orion-core
+      - nats
+    restart: unless-stopped
+
+  # Grafana for observability
+  grafana:
+    image: grafana/grafana:10.2
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana:/etc/grafana/provisioning:ro
+    depends_on:
+      - loki
+      - tempo
+    restart: unless-stopped
+
+  # Loki for logs
+  loki:
+    image: grafana/loki:2.9
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki_data:/loki
+      - ./config/loki.yaml:/etc/loki/local-config.yaml:ro
+    restart: unless-stopped
+
+  # Tempo for traces
+  tempo:
+    image: grafana/tempo:2.4
+    command: -config.file=/etc/tempo.yaml
+    ports:
+      - "3200:3200"   # Tempo
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    volumes:
+      - tempo_data:/var/tempo
+      - ./config/tempo.yaml:/etc/tempo.yaml:ro
+    restart: unless-stopped
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:v2.48
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+
+  # Node Exporter for host metrics
+  node-exporter:
+    image: prom/node-exporter:v1.7
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+
+  # Cadvisor for container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49
+    ports:
+      - "8081:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    restart: unless-stopped
+
+volumes:
+  nats_data:
+  orion_data:
+  grafana_data:
+  loki_data:
+  tempo_data:
+  prometheus_data:

@@ -1,0 +1,20 @@
+[package]
+name = "orion-types"
+version = "0.1.0"
+edition = "2021"
+description = "ORION shared types - avoids circular dependencies"
+
+[lib]
+name = "orion_types"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1"
+dirs = "5.0"
+toml = "0.8"
+async-nats = "0.33"
+futures-util = "0.3"

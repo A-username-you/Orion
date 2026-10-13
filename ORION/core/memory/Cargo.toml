@@ -1,0 +1,27 @@
+[package]
+name = "orion-memory"
+version = "0.1.0"
+edition = "2024"
+description = "ORION memory graph: sqlite-vec, entity extraction, hybrid search"
+
+[features]
+default = ["embeddings"]
+embeddings = ["candle-core", "candle-nn", "candle-transformers"]
+
+[dependencies]
+orion-types = { path = "../types" }
+sqlite = { version = "0.36", features = ["bundled", "extension"] }
+sqlite-vec = "0.1.0"
+# libsqlite3-sys = { version = "0.30", features = ["bundled", "loadable_extension"] }  # Not needed, sqlite crate bundles it
+candle-core = { version = "0.8", features = [], optional = true }
+candle-nn = { version = "0.8", optional = true }
+candle-transformers = { version = "0.8", optional = true }
+tokenizers = "0.20"
+anyhow = "1.0"
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+walkdir = "2.5"
+notify = "6.1"
+dirs = "5.0"

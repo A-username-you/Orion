@@ -1,0 +1,67 @@
+# ORION Core Daemon - Multi-stage build
+FROM nvidia/cuda:12.4-devel-ubuntu22.04 AS builder
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    libclang-dev \
+    clang \
+    cmake \
+    protobuf-compiler \
+    libasound2-dev \
+    libx11-dev \
+    libxcb-dev \
+    libwayland-dev \
+    libtesseract-dev \
+    tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy workspace
+COPY core/ ./core/
+COPY skills/ ./skills/
+
+# Build workspace
+RUN cd core && cargo build --release --workspace
+
+# Runtime stage
+FROM nvidia/cuda:12.4-runtime-ubuntu22.04
+
+RUN apt-get update && apt-get install -y \
+    libasound2 \
+    libx11-6 \
+    libxcb1 \
+    libwayland-client0 \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy binaries
+COPY --from=builder /app/core/target/release/orion-core /usr/local/bin/
+
+# Copy models directory structure (models mounted at runtime)
+RUN mkdir -p /models /var/lib/orion /etc/orion
+
+# Create non-root user
+RUN useradd -m -u 1000 orion && \
+    chown -R orion:orion /var/lib/orion /etc/orion
+
+USER orion
+
+ENV ORION_PROFILE=server \
+    ORION_CONFIG_DIR=/etc/orion \
+    ORION_MODELS_DIR=/models \
+    NATS_URL=nats://nats:4222 \
+    RUST_LOG=info
+
+EXPOSE 50051
+
+ENTRYPOINT ["orion-core"]

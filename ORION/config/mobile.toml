@@ -1,0 +1,39 @@
+# Hermes Profile: ORION Mobile
+# Active modules: voice, bus (relay to desktop/server)
+
+profile = "orion-mobile"
+description = "ORION mobile companion (React Native/Expo)"
+extends = "default"
+
+[modules.voice]
+enabled = true
+wake_word = "orion"
+stt_model = "whisper-tiny"  # Smaller for mobile
+tts_model = "kokoro"  # Lighter than piper
+
+[modules.control]
+enabled = false
+
+[modules.memory]
+enabled = false  # Queries desktop/server via bus
+
+[modules.planning]
+enabled = false  # Delegates to server
+
+[modules.automation]
+enabled = false
+
+[modules.security]
+enabled = true
+profile = "mobile"
+
+skills = [
+  "orion-voice",
+  "orion-security",
+  "hermes-agent"
+]
+
+[environment]
+ORION_PROFILE = "mobile"
+ORION_CONFIG_DIR = "~/.config/orion"
+ORION_MODELS_DIR = "~/.orion/models"

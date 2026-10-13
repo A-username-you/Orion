@@ -1,0 +1,46 @@
+# Hermes Profile: ORION Server
+# Active modules: memory, planning, automation, security (no voice/control)
+
+profile = "orion-server"
+description = "ORION headless server for API/multi-agent"
+extends = "default"
+
+[modules.voice]
+enabled = false
+
+[modules.control]
+enabled = false
+
+[modules.memory]
+enabled = true
+watch_paths = ["/data", "/workspace", "/config"]
+
+[modules.planning]
+enabled = true
+llm_model = "nvidia/nemotron-3-ultra"
+max_context_tokens = 65536
+
+[modules.automation]
+enabled = true
+max_concurrent = 50
+
+[modules.security]
+enabled = true
+profile = "server"
+
+skills = [
+  "orion-memory",
+  "orion-planning",
+  "orion-automation",
+  "orion-security",
+  "hermes-agent",
+  "codex",
+  "claude-code",
+  "opencode"
+]
+
+[environment]
+ORION_PROFILE = "server"
+ORION_CONFIG_DIR = "/etc/orion"
+ORION_MODELS_DIR = "/models"
+CUDA_VISIBLE_DEVICES = "0"

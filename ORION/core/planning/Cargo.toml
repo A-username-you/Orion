@@ -1,0 +1,28 @@
+[package]
+name = "orion-planning"
+version = "0.1.0"
+edition = "2024"
+description = "ORION planning core: LLM router, tool executor, goal decomposition"
+
+[features]
+default = []
+llm = ["candle-core", "candle-nn", "candle-transformers"]
+
+[dependencies]
+orion-types = { path = "../types" }
+candle-core = { version = "0.8", features = [], optional = true }
+candle-nn = { version = "0.8", optional = true }
+candle-transformers = { version = "0.8", optional = true }
+tokenizers = "0.20"
+async-nats = "0.33"
+tonic = { workspace = true }
+prost = { workspace = true }
+anyhow = "1.0"
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+schemars = "0.8"
+dirs = "5.0"
+futures-util = "0.3"
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "gzip"] }

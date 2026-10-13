@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "suite": "mbpp",
+    "n": 5,
+    "passed": 0,
+    "pass_at_1": 0.0
+  },
+  "results": [
+    {
+      "task_id": 11,
+      "passed": false,
+      "latency": 6.214984178543091,
+      "prompt": "Write a python function to remove first and last occurrence of a given character from the string."
+    },
+    {
+      "task_id": 12,
+      "passed": false,
+      "latency": 2.21053409576416,
+      "prompt": "Write a function to sort a given matrix in ascending order according to the sum of its rows."
+    },
+    {
+      "task_id": 13,
+      "passed": false,
+      "latency": 6.035291910171509,
+      "prompt": "Write a function to count the most common words in a dictionary."
+    },
+    {
+      "task_id": 14,
+      "passed": false,
+      "latency": 2.5304205417633057,
+      "prompt": "Write a python function to find the volume of a triangular prism."
+    },
+    {
+      "task_id": 15,
+      "passed": false,
+      "latency": 10.199937582015991,
+      "prompt": "Write a function to split a string at lowercase letters."
+    }
+  ]
+}

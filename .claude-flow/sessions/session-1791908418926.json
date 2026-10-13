@@ -1,0 +1,15 @@
+{
+  "id": "session-1791908418926",
+  "startedAt": "2026-10-13T16:20:18.926Z",
+  "cwd": "/home/unk-/Orion",
+  "context": {},
+  "metrics": {
+    "edits": 0,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "restoredAt": "2026-10-13T16:20:56.943Z",
+  "endedAt": "2026-10-13T16:20:57.310Z",
+  "duration": 38384
+}

@@ -1,0 +1,10 @@
+fastapi==0.109
+uvicorn[standard]==0.27
+pydantic==2.6
+pydantic-settings==2.2
+async-nats==0.10
+grpcio==1.62
+grpcio-tools==1.62
+python-dotenv==1.0
+prometheus-client==0.19
+structlog==24.1

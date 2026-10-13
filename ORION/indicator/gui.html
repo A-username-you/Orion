@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orion Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #state {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        #history {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .user {
+            background-color: #e3f2fd;
+            text-align: right;
+        }
+        .orion {
+            background-color: #f3e5f5;
+            text-align: left;
+        }
+        #input-area {
+            display: flex;
+            gap: 10px;
+        }
+        #command {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #send-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        #send-btn:hover {
+            background-color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Orion Assistant</h1>
+    <div id="state">State: idle</div>
+    
+    <div id="history">
+        <!-- Messages will be inserted here -->
+    </div>
+    
+    <div id="input-area">
+        <input type="text" id="command" placeholder="Type a command...">
+        <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+        const stateEl = document.getElementById('state');
+        const historyEl = document.getElementById('history');
+        const commandInput = document.getElementById('command');
+        const sendBtn = document.getElementById('send-btn');
+        
+        // Update state every second
+        setInterval(async () => {
+            try {
+                const response = await fetch('/state');
+                const data = await response.json();
+                stateEl.textContent = `State: ${data.state}`;
+                
+                // Update color based on state
+                stateEl.style.color = getStateColor(data.state);
+            } catch (error) {
+                console.error('Error fetching state:', error);
+            }
+        }, 1000);
+        
+        function getStateColor(state) {
+            switch (state) {
+                case 'idle': return '#808080';
+                case 'listening': return '#00BFFF';
+                case 'thinking': return '#FFA500';
+                case 'speaking': return '#00FF00';
+                default: return '#808080';
+            }
+        }
+        
+        // Handle sending commands
+        async function sendCommand() {
+            const command = commandInput.value.trim();
+            if (!command) return;
+            
+            // Add user message to history
+            addMessage('You: ' + command, 'user');
+            commandInput.value = '';
+            
+            try {
+                const response = await fetch('/command', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ 'command': command })
+                });
+                
+                const data = await response.json();
+                addMessage('Orion: ' + data.output, 'orion');
+                
+                // Scroll to bottom
+                historyEl.scrollTop = historyEl.scrollHeight;
+            } catch (error) {
+                console.error('Error sending command:', error);
+                addMessage('Error: ' + error.message, 'orion');
+            }
+        }
+        
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = text;
+            historyEl.appendChild(messageDiv);
+        }
+        
+        // Event listeners
+        sendBtn.addEventListener('click', sendCommand);
+        commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendCommand();
+            }
+        });
+        
+        // Initial scroll to bottom
+        historyEl.scrollTop = historyEl.scrollHeight;
+    </script>
+</body>
+</html>

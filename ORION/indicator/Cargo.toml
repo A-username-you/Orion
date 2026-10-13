@@ -1,0 +1,14 @@
+[package]
+name = "orion-indicator"
+version = "0.1.0"
+edition = "2021"
+description = "Orion indicator – GTK3 floating icon (state simulation)"
+
+[dependencies]
+gtk = "0.9"
+glib = "0.9"
+gdk = "0.9"
+
+[[bin]]
+name = "orion-indicator"
+path = "src/main.rs"

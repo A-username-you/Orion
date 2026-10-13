@@ -1,0 +1,11 @@
+[package]
+name = "gtk3_test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gtk3 = "0.9"
+
+[[bin]]
+name = "gtk3_test"
+path = "src/main.rs"
